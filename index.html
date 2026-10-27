@@ -670,5 +670,115 @@ document.getElementById('loginForm').addEventListener('submit',function(e){
 });
 if(checkAuth())navigate('dashboard');
 </script>
+<script>
+(function(){
+  async function hashPwd(p){const b=new TextEncoder().encode(p);const h=await crypto.subtle.digest('SHA-256',b);return Array.from(new Uint8Array(h)).map(x=>x.toString(16).padStart(2,'0')).join('');}
+  function getUsers(){return JSON.parse(localStorage.getItem('dm_users')||'[]');}
+  function saveUsers(u){localStorage.setItem('dm_users',JSON.stringify(u));}
+  function nextUserId(){const u=getUsers();return u.length?Math.max.apply(null,u.map(x=>x.id))+1:1;}
+  async function initUsers(){if(!localStorage.getItem('dm_users')){const h=await hashPwd('admin123');saveUsers([{id:1,nom:'Admin Principal',email:'admin@daara.com',pwdHash:h,role:'admin',actif:true,dateCreation:new Date().toISOString().split('T')[0]}]);}}
+  async function doLoginNew(email,pwd){await initUsers();const h=await hashPwd(pwd);const u=getUsers().find(x=>x.email.toLowerCase()===email.toLowerCase()&&x.pwdHash===h&&x.actif);if(u){localStorage.setItem('daara_user',JSON.stringify({id:u.id,name:u.nom,nom:u.nom,email:u.email,role:u.role}));return true;}return false;}
+  async function creerUtilisateur(d){const u=getUsers();if(u.some(x=>x.email.toLowerCase()===d.email.toLowerCase())){toast('Email deja utilise','error');return false;}const h=await hashPwd(d.password);u.push({id:nextUserId(),nom:d.nom,email:d.email,pwdHash:h,role:d.role,actif:d.actif!==false,dateCreation:new Date().toISOString().split('T')[0]});saveUsers(u);return true;}
+  async function modifierUtilisateur(id,d){const u=getUsers();const i=u.findIndex(x=>x.id===id);if(i===-1)return false;if(u.some(x=>x.id!==id&&x.email.toLowerCase()===d.email.toLowerCase())){toast('Email deja utilise','error');return false;}u[i].nom=d.nom;u[i].email=d.email;u[i].role=d.role;u[i].actif=d.actif!==false;if(d.password&&d.password.trim())u[i].pwdHash=await hashPwd(d.password);saveUsers(u);return true;}
+  function supprimerUtilisateur(id){const c=getCurrentUser();if(c.id===id){toast('Impossible de supprimer votre compte','error');return false;}const u=getUsers();const t=u.find(x=>x.id===id);if(t&&t.role==='admin'&&u.filter(x=>x.role==='admin'&&x.actif).length<=1){toast('Dernier admin actif','error');return false;}saveUsers(u.filter(x=>x.id!==id));return true;}
+  async function resetMotDePasse(id,np){const h=await hashPwd(np);const u=getUsers();const i=u.findIndex(x=>x.id===id);if(i!==-1){u[i].pwdHash=h;saveUsers(u);return true;}return false;}
+  const ROLES={admin:{label:'Administrateur',color:'badge-danger',desc:'Acces total'},maitre:{label:'Maitre',color:'badge-success',desc:'Talibes, presences, suivi'},comptable:{label:'Comptable',color:'badge-warning',desc:'Paiements, comptabilite'},parent:{label:'Parent',color:'badge-blue',desc:'Lecture seule'}};
+  function getRoleBadge(r){const x=ROLES[r]||{color:'badge-blue',label:r};return '<span class="badge '+x.color+'">'+x.label+'</span>';}
+  window.hashPwd=hashPwd;window.getUsers=getUsers;window.saveUsers=saveUsers;window.doLogin=doLoginNew;window.initUsers=initUsers;window.creerUtilisateur=creerUtilisateur;window.modifierUtilisateur=modifierUtilisateur;window.supprimerUtilisateur=supprimerUtilisateur;window.resetMotDePasse=resetMotDePasse;window.ROLES=ROLES;window.getRoleBadge=getRoleBadge;
+  window.renderUtilisateurs=function(){
+    const user=getCurrentUser();
+    if(user.role!=='admin'){document.getElementById('mainContent').innerHTML=topbar('Utilisateurs')+'<div class="card"><div class="empty">Seul un administrateur peut gerer les utilisateurs.</div></div>';return;}
+    const users=getUsers();const cur=user;
+    let html=topbar('Gestion des Utilisateurs','<button class="btn btn-success" onclick="openUserModal()">+ Nouvel utilisateur</button>');
+    html+='<div class="card"><table><thead><tr><th>Nom</th><th>Email</th><th>Role</th><th>Statut</th><th>Cree le</th><th>Actions</th></tr></thead><tbody>';
+    if(users.length===0)html+='<tr><td colspan="6" class="empty">Aucun utilisateur</td></tr>';
+    else html+=users.map(function(u){return '<tr><td><strong>'+esc(u.nom)+'</strong>'+(u.id===cur.id?' <span class="badge badge-blue">Vous</span>':'')+'</td><td>'+esc(u.email)+'</td><td>'+getRoleBadge(u.role)+'</td><td>'+(u.actif?'<span class="badge badge-success">Actif</span>':'<span class="badge badge-danger">Inactif</span>')+'</td><td>'+u.dateCreation+'</td><td><button class="btn btn-sm btn-warning" onclick="openUserModal('+u.id+')">Editer</button> <button class="btn btn-sm btn-blue" onclick="openResetPwd('+u.id+')">Mdp</button>'+(u.id!==cur.id?' <button class="btn btn-sm btn-danger" onclick="delUser('+u.id+')">Suppr</button>':'')+'</td></tr>';}).join('');
+    html+='</tbody></table></div>';
+    document.getElementById('mainContent').innerHTML=html;
+  };
+  window.openUserModal=function(id){
+    const u=id?getUsers().find(function(x){return x.id===id;}):null;
+    const opts=Object.keys(ROLES).map(function(k){return '<option value="'+k+'"'+(u&&u.role===k?' selected':'')+'>'+ROLES[k].label+' - '+ROLES[k].desc+'</option>';}).join('');
+    openModal('<h3>'+(u?'Modifier':'Nouvel')+' utilisateur</h3><form id="userForm"><input type="hidden" id="uId" value="'+(u?u.id:'')+'">'+
+      '<div class="form-group"><label>Nom *</label><input id="uNom" value="'+(u?esc(u.nom):'')+'" required></div>'+
+      '<div class="form-group"><label>Email *</label><input type="email" id="uEmail" value="'+(u?esc(u.email):'')+'" required></div>'+
+      '<div class="form-group"><label>Mot de passe '+(u?'(vide = inchange)':'*')+'</label><input type="password" id="uPwd" '+(u?'':'required minlength="6"')+' placeholder="'+(u?'Nouveau...':'Min. 6 car.')+'"></div>'+
+      '<div class="form-group"><label>Role *</label><select id="uRole" required>'+opts+'</select></div>'+
+      '<div class="form-group"><label><input type="checkbox" id="uActif" '+(!u||u.actif?'checked':'')+' style="width:auto;margin-right:8px">Compte actif</label></div>'+
+      '<div class="modal-actions"><button type="button" class="btn btn-cancel" onclick="closeModal()">Annuler</button><button type="submit" class="btn btn-success">Enregistrer</button></div></form>');
+    document.getElementById('userForm').addEventListener('submit',async function(e){
+      e.preventDefault();
+      const d={nom:document.getElementById('uNom').value.trim(),email:document.getElementById('uEmail').value.trim(),password:document.getElementById('uPwd').value,role:document.getElementById('uRole').value,actif:document.getElementById('uActif').checked};
+      if(!id&&d.password.length<6){toast('Mot de passe : min. 6 caracteres','error');return;}
+      const ok=id?await modifierUtilisateur(id,d):await creerUtilisateur(d);
+      if(ok){closeModal();toast(id?'Utilisateur modifie':'Utilisateur cree');navigate('utilisateurs');}
+    });
+  };
+  window.openResetPwd=function(id){
+    const u=getUsers().find(function(x){return x.id===id;});if(!u)return;
+    openModal('<h3>Reinitialiser mot de passe</h3><p style="margin-bottom:15px;color:#666">Utilisateur : <strong>'+esc(u.nom)+'</strong></p><form id="pwdForm"><div class="form-group"><label>Nouveau mot de passe *</label><input type="password" id="newPwd" required minlength="6"></div><div class="modal-actions"><button type="button" class="btn btn-cancel" onclick="closeModal()">Annuler</button><button type="submit" class="btn btn-success">Reinitialiser</button></div></form>');
+    document.getElementById('pwdForm').addEventListener('submit',async function(e){
+      e.preventDefault();
+      const ok=await resetMotDePasse(id,document.getElementById('newPwd').value);
+      if(ok){closeModal();toast('Mot de passe reinitialise');}
+    });
+  };
+  window.delUser=function(id){
+    if(!confirm('Supprimer cet utilisateur ?'))return;
+    if(supprimerUtilisateur(id)){toast('Utilisateur supprime');navigate('utilisateurs');}
+  };
+  window.renderSidebar=function(active){
+    const cur=active||window.currentPage||'dashboard';
+    const impayes=(typeof getImpayes==='function'&&typeof monthStr==='function')?getImpayes(monthStr()).length:0;
+    const items=[
+      {key:'dashboard',icon:'&#128202;',label:'Tableau de bord'},
+      {key:'talibes',icon:'&#128102;',label:'Talibes'},
+      {key:'maitres',icon:'&#128104;',label:'Maitres'},
+      {key:'halaqas',icon:'&#128218;',label:'Halaqas'},
+      {key:'presences',icon:'&#9989;',label:'Presences'},
+      {key:'suivi',icon:'&#128214;',label:'Suivi coranique'},
+      {key:'paiements',icon:'&#128176;',label:'Paiements',badge:impayes},
+      {key:'comptabilite',icon:'&#128200;',label:'Comptabilite'},
+      {key:'utilisateurs',icon:'&#128100;',label:'Utilisateurs'},
+      {key:'parametres',icon:'&#9881;',label:'Parametres'}
+    ];
+    const h='<div class="brand">&#128214; Daara Manager</div><nav>'+items.map(function(it){return '<a href="javascript:navigate(\''+it.key+'\')"'+(cur===it.key?' class="active"':'')+'><span class="icon">'+it.icon+'</span><span>'+it.label+'</span>'+(it.badge?'<span class="cnt">'+it.badge+'</span>':'')+'</a>';}).join('')+'</nav>';
+    document.getElementById('sidebar').innerHTML=h;
+  };
+  const _originalNavigate=window.navigate;
+  window.navigate=function(page,param){
+    if(page==='utilisateurs'){
+      if(typeof checkAuth==='function'&&!checkAuth()){document.getElementById('login-screen').style.display='flex';document.getElementById('app').style.display='none';return;}
+      document.getElementById('login-screen').style.display='none';
+      document.getElementById('app').style.display='flex';
+      window.currentPage='utilisateurs';
+      renderSidebar('utilisateurs');
+      renderUtilisateurs();
+      return;
+    }
+    _originalNavigate(page,param);
+  };
+  document.addEventListener('DOMContentLoaded',function(){
+    const oldForm=document.getElementById('loginForm');
+    if(oldForm){
+      const newForm=oldForm.cloneNode(true);
+      oldForm.replaceWith(newForm);
+      newForm.addEventListener('submit',async function(e){
+        e.preventDefault();
+        const email=document.getElementById('loginEmail').value.trim();
+        const pwd=document.getElementById('loginPwd').value;
+        const err=document.getElementById('loginErr');
+        const ok=await doLoginNew(email,pwd);
+        if(ok){window.location.reload();}
+        else if(err){err.textContent='Email ou mot de passe incorrect, ou compte inactif';}
+      });
+    }
+    initUsers();
+    if(typeof checkAuth==='function'&&checkAuth()){
+      setTimeout(function(){navigate('dashboard');},100);
+    }
+  });
+})();
+</script>
 </body>
 </html>
