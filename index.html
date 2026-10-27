@@ -1,0 +1,674 @@
+﻿<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Daara Manager PRO</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Segoe UI,Tahoma,sans-serif}
+:root{--primary:#059669;--primary-dark:#047857;--secondary:#f59e0b;--dark:#1f2937;--light:#f9fafb;--border:#e5e7eb;--danger:#dc2626;--success:#10b981;--blue:#3b82f6;--purple:#8b5cf6;--gold:#d97706}
+body{background:var(--light);color:var(--dark)}
+.login-page{display:flex;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(135deg,#059669,#047857)}
+.login-container{width:100%;max-width:420px;padding:20px}
+.login-card{background:#fff;border-radius:16px;padding:40px 30px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.logo{text-align:center;margin-bottom:30px}.logo-icon{font-size:50px}
+.logo h1{color:var(--primary);margin:10px 0 5px}.logo p{color:#666;font-size:14px}
+.form-group{margin-bottom:16px}.form-group label{display:block;margin-bottom:6px;font-size:14px;font-weight:600}
+.form-group input,.form-group select,.form-group textarea{width:100%;padding:11px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit}
+.form-group input:focus,.form-group select:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(5,150,105,.1)}
+.btn-primary{width:100%;padding:12px;background:var(--primary);color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer}
+.btn-primary:hover{background:var(--primary-dark)}
+.error-msg{color:var(--danger);font-size:13px;margin-top:10px;text-align:center}
+.hint{text-align:center;font-size:12px;color:#999;margin-top:20px}
+.app-layout{display:none;min-height:100vh}
+.sidebar{width:240px;background:var(--dark);color:#fff;padding:20px 0;position:fixed;height:100vh;overflow-y:auto;z-index:100}
+.sidebar .brand{padding:0 20px 20px;font-size:18px;font-weight:bold;border-bottom:1px solid rgba(255,255,255,.1);margin-bottom:15px}
+.sidebar nav a{display:flex;align-items:center;gap:12px;padding:12px 20px;color:#cbd5e1;text-decoration:none;font-size:14px;transition:all .2s}
+.sidebar nav a:hover,.sidebar nav a.active{background:var(--primary);color:#fff;border-left:4px solid var(--secondary)}
+.sidebar nav a .icon{font-size:18px;width:20px;text-align:center}
+.sidebar nav a .cnt{background:var(--danger);color:#fff;border-radius:10px;padding:2px 7px;font-size:11px;margin-left:auto;font-weight:bold}
+.main-content{margin-left:240px;flex:1;padding:25px}
+.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:25px;padding-bottom:15px;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:10px}
+.topbar h2{color:var(--dark)}
+.user-info{display:flex;align-items:center;gap:12px}
+.user-avatar{width:38px;height:38px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:bold}
+.btn-logout{background:transparent;border:1px solid var(--border);padding:8px 14px;border-radius:6px;cursor:pointer;font-size:13px}
+.btn-logout:hover{background:var(--danger);color:#fff;border-color:var(--danger)}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:25px}
+.stat-card{background:#fff;padding:18px;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.05);border-left:4px solid var(--primary)}
+.stat-card h3{font-size:12px;color:#666;text-transform:uppercase;margin-bottom:8px}
+.stat-card .value{font-size:24px;font-weight:bold}
+.stat-card .sub{font-size:11px;color:#888;margin-top:4px}
+.stat-card.orange{border-left-color:var(--secondary)}.stat-card.blue{border-left-color:var(--blue)}
+.stat-card.red{border-left-color:var(--danger)}.stat-card.purple{border-left-color:var(--purple)}
+.stat-card.gold{border-left-color:var(--gold)}
+.card{background:#fff;border-radius:12px;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,.05);margin-bottom:20px}
+.card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;flex-wrap:wrap;gap:10px}
+.card-header h3{font-size:16px}
+.filters{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.filters input,.filters select{padding:8px;border:1px solid var(--border);border-radius:6px;font-size:13px}
+.btn{padding:9px 16px;border:none;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600;transition:all .2s}
+.btn-success{background:var(--primary);color:#fff}.btn-success:hover{background:var(--primary-dark)}
+.btn-danger{background:var(--danger);color:#fff}.btn-warning{background:var(--secondary);color:#fff}
+.btn-blue{background:var(--blue);color:#fff}.btn-gold{background:var(--gold);color:#fff}
+.btn-sm{padding:5px 10px;font-size:12px}
+.btn-cancel{background:#e5e7eb;color:var(--dark)}
+table{width:100%;border-collapse:collapse}
+table th{text-align:left;padding:10px;font-size:11px;text-transform:uppercase;color:#666;border-bottom:2px solid var(--border)}
+table td{padding:10px;border-bottom:1px solid var(--border);font-size:13px;vertical-align:middle}
+table tr:hover{background:var(--light)}
+.badge{padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600;display:inline-block}
+.badge-success{background:#d1fae5;color:#065f46}.badge-danger{background:#fee2e2;color:#991b1b}
+.badge-warning{background:#fef3c7;color:#92400e}.badge-blue{background:#dbeafe;color:#1e40af}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;align-items:center;justify-content:center;padding:15px}
+.modal.active{display:flex}
+.modal-content{background:#fff;border-radius:12px;padding:25px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto}
+.modal-content h3{margin-bottom:20px}
+.modal-actions{display:flex;gap:10px;margin-top:20px;justify-content:flex-end}
+.empty{text-align:center;color:#888;padding:30px}
+.avatar{width:40px;height:40px;border-radius:50%;object-fit:cover;background:var(--primary);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-weight:bold;font-size:15px}
+.avatar-lg{width:120px;height:120px;font-size:44px;border-radius:50%;object-fit:cover;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:bold;margin:0 auto 15px}
+.photo-upload{display:flex;flex-direction:column;align-items:center;gap:10px;margin-bottom:15px}
+.photo-upload input[type=file]{display:none}
+.photo-btn{background:var(--primary);color:#fff;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600}
+.profile-header{display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap;margin-bottom:20px}
+.profile-info{flex:1;min-width:200px}
+.profile-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.alert-banner{background:#fef3c7;border-left:4px solid var(--gold);padding:14px 18px;border-radius:8px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+.alert-banner strong{color:#78350f}
+.toast{position:fixed;top:20px;right:20px;padding:14px 20px;border-radius:8px;color:#fff;font-weight:600;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,.15)}
+.toast.success{background:var(--success)}.toast.error{background:var(--danger)}.toast.info{background:var(--blue)}
+.month-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-top:10px}
+.month-card{padding:12px;border-radius:8px;text-align:center;border:2px solid var(--border);background:#fff}
+.month-card.paid{border-color:var(--success);background:#f0fdf4}
+.month-card.unpaid{border-color:var(--danger);background:#fef2f2}
+.month-card .m{font-size:12px;color:#666;text-transform:uppercase;margin-bottom:4px}
+.month-card .s{font-weight:bold;font-size:13px}
+.month-card .s.paid{color:var(--success)}.month-card .s.unpaid{color:var(--danger)}
+.month-card button{margin-top:6px;font-size:11px;padding:4px 8px}
+.receipt{background:#fff;padding:30px;max-width:500px;margin:0 auto;border:2px dashed var(--border)}
+.receipt h2{text-align:center;color:var(--primary);margin-bottom:5px}
+.receipt .sub{text-align:center;color:#666;font-size:12px;margin-bottom:20px;border-bottom:1px solid var(--border);padding-bottom:15px}
+.receipt .row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px dotted var(--border);font-size:14px}
+.receipt .total{font-size:18px;font-weight:bold;color:var(--primary);margin-top:15px;padding-top:15px;border-top:2px solid var(--primary);text-align:center}
+.bilan-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-top:15px}
+.bilan-item{padding:15px;border-radius:8px;background:var(--light);border-left:3px solid var(--primary)}
+.bilan-item .l{font-size:11px;color:#666;text-transform:uppercase;margin-bottom:5px}
+.bilan-item .v{font-size:18px;font-weight:bold}
+.bilan-item.red{border-left-color:var(--danger)}
+.bilan-item.green{border-left-color:var(--success)}
+.bilan-item.gold{border-left-color:var(--gold)}
+.bilan-item.blue{border-left-color:var(--blue)}
+@media(max-width:768px){.sidebar{width:60px}.sidebar .brand,.sidebar nav a span:not(.icon){display:none}.main-content{margin-left:60px;padding:15px}}
+@media print{.sidebar,.topbar,.profile-actions,.btn{display:none!important}.main-content{margin:0}}
+</style>
+</head>
+<body>
+
+<div id="login-screen" class="login-page">
+  <div class="login-container">
+    <div class="login-card">
+      <div class="logo"><span class="logo-icon">&#128214;</span><h1>Daara Manager PRO</h1><p>Gestion complete de daara coranique</p></div>
+      <form id="loginForm">
+        <div class="form-group"><label>Email</label><input type="email" id="loginEmail" required value="admin@daara.com"></div>
+        <div class="form-group"><label>Mot de passe</label><input type="password" id="loginPwd" required value="admin123"></div>
+        <button type="submit" class="btn-primary">Se connecter</button>
+        <p class="error-msg" id="loginErr"></p>
+      </form>
+      <p class="hint">Demo: admin@daara.com / admin123</p>
+    </div>
+  </div>
+</div>
+
+<div id="app" class="app-layout">
+  <aside class="sidebar" id="sidebar"></aside>
+  <main class="main-content" id="mainContent"></main>
+</div>
+
+<div class="modal" id="modal"><div class="modal-content" id="modalContent"></div></div>
+
+<script>
+// ===== INIT DATA =====
+function initData(){
+  if(!localStorage.getItem('dm_talibes'))localStorage.setItem('dm_talibes',JSON.stringify([
+    {id:1,nom:'Mamadou Diop',age:10,tuteur:'Ibrahima Diop',tel:'771234567',niveau:'Debutant',halaqaId:1,dateInscription:'2024-01-15',ecolageMensuel:5000,statut:'Actif',photo:null},
+    {id:2,nom:'Fatou Sow',age:9,tuteur:'Aminata Sow',tel:'772345678',niveau:'Intermediaire',halaqaId:1,dateInscription:'2024-02-10',ecolageMensuel:5000,statut:'Actif',photo:null},
+    {id:3,nom:'Ousmane Ba',age:12,tuteur:'Cheikh Ba',tel:'773456789',niveau:'Avance',halaqaId:2,dateInscription:'2023-09-01',ecolageMensuel:5000,statut:'Actif',photo:null},
+    {id:4,nom:'Aissatou Ndiaye',age:8,tuteur:'Moussa Ndiaye',tel:'774567890',niveau:'Debutant',halaqaId:1,dateInscription:'2024-03-20',ecolageMensuel:5000,statut:'Actif',photo:null}
+  ]));
+  if(!localStorage.getItem('dm_maitres'))localStorage.setItem('dm_maitres',JSON.stringify([
+    {id:1,nom:'Cheikh Ahmadou Bamba',specialite:'Hifz',tel:'771112233',salaire:50000,halaqaId:1},
+    {id:2,nom:'Serigne Modou Kara',specialite:'Tajwid',tel:'772223344',salaire:45000,halaqaId:2}
+  ]));
+  if(!localStorage.getItem('dm_halaqas'))localStorage.setItem('dm_halaqas',JSON.stringify([
+    {id:1,nom:'Halaqa Al-Fatiha',niveau:'Debutant',horaire:'08h-11h',maitreId:1},
+    {id:2,nom:'Halaqa Al-Baqara',niveau:'Avance',horaire:'14h-17h',maitreId:2}
+  ]));
+  if(!localStorage.getItem('dm_presences')){var t=todayStr();localStorage.setItem('dm_presences',JSON.stringify([
+    {id:1,talibeId:1,date:t,statut:'Present'},{id:2,talibeId:2,date:t,statut:'Present'},{id:3,talibeId:3,date:t,statut:'Absent'}
+  ]));}
+  if(!localStorage.getItem('dm_suivi'))localStorage.setItem('dm_suivi',JSON.stringify([
+    {id:1,talibeId:1,sourate:'Al-Fatiha',statut:'Maitrisee',note:18,date:'2024-11-10'}
+  ]));
+  if(!localStorage.getItem('dm_transactions')){var d=new Date(),m=d.getMonth()+1,y=d.getFullYear();var mk=j=>y+'-'+(j<10?'0'+j:j);localStorage.setItem('dm_transactions',JSON.stringify([
+    {id:1,type:'recette',categorie:'Ecolage',montant:5000,date:mk(m)+'-05',description:'Ecolage Mamadou',talibeId:1},
+    {id:2,type:'recette',categorie:'Don',montant:25000,date:mk(m)+'-10',description:'Don bienfaiteur',talibeId:null},
+    {id:3,type:'depense',categorie:'Salaire',montant:50000,date:mk(m)+'-01',description:'Salaire Cheikh',talibeId:null},
+    {id:4,type:'depense',categorie:'Nourriture',montant:15000,date:mk(m)+'-08',description:'Repas talibes',talibeId:null}
+  ]));}
+  if(!localStorage.getItem('dm_params'))localStorage.setItem('dm_params',JSON.stringify({nomDaara:'Daara Al-Khayr',devise:'FCFA',ecolageDefaut:5000}));
+}
+
+// ===== HELPERS =====
+function getData(k){return JSON.parse(localStorage.getItem(k)||'[]');}
+function setData(k,v){localStorage.setItem(k,JSON.stringify(v));}
+function getParam(){return JSON.parse(localStorage.getItem('dm_params')||'{}');}
+function nextId(k){var it=getData(k);return it.length?Math.max.apply(null,it.map(function(i){return i.id;}))+1:1;}
+function fmtMoney(n){var p=getParam();return (n||0).toLocaleString('fr-FR')+' '+(p.devise||'FCFA');}
+function todayStr(){return new Date().toISOString().split('T')[0];}
+function monthStr(d){d=d||new Date();return d.getFullYear()+'-'+(d.getMonth()<9?'0':'')+(d.getMonth()+1);}
+function monthLabel(m){var n=['Janvier','Fevrier','Mars','Avril','Mai','Juin','Juillet','Aout','Septembre','Octobre','Novembre','Decembre'];var p=m.split('-');return n[parseInt(p[1])-1]+' '+p[0];}
+function getInitiales(nom){return nom.split(' ').map(function(w){return w.charAt(0);}).join('').slice(0,2).toUpperCase();}
+function esc(s){return String(s||'').replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function toast(msg,type){var d=document.createElement('div');d.className='toast '+(type||'success');d.textContent=msg;document.body.appendChild(d);setTimeout(function(){d.remove();},2500);}
+function getMoisRecents(n){var arr=[];var d=new Date();for(var i=0;i<n;i++){var y=d.getFullYear(),m=d.getMonth()+1;arr.push(y+'-'+(m<10?'0'+m:m));d.setMonth(d.getMonth()-1);}return arr;}
+
+// ===== LIEN PAIEMENTS <-> COMPTABILITE =====
+function isPaye(tid,mois){
+  return getData('dm_transactions').some(function(t){return t.type==='recette'&&t.categorie==='Ecolage'&&t.talibeId===tid&&t.date.indexOf(mois)===0;});
+}
+function getImpayes(mois){return getData('dm_talibes').filter(function(t){return t.statut==='Actif'&&!isPaye(t.id,mois);});}
+function getPayes(mois){return getData('dm_talibes').filter(function(t){return t.statut==='Actif'&&isPaye(t.id,mois);});}
+function payerMois(tid,mois,montant){
+  var tal=getData('dm_talibes').find(function(t){return t.id===tid;});
+  if(!tal)return null;
+  if(isPaye(tid,mois)){toast('Deja paye pour '+monthLabel(mois),'error');return null;}
+  var tx=getData('dm_transactions');
+  var newTx={id:nextId('dm_transactions'),type:'recette',categorie:'Ecolage',montant:montant||tal.ecolageMensuel,date:mois+'-'+new Date().getDate(),description:'Ecolage '+monthLabel(mois)+' - '+tal.nom,talibeId:tid};
+  tx.push(newTx);setData('dm_transactions',tx);
+  toast('Paiement enregistre : '+fmtMoney(newTx.montant));
+  return newTx;
+}
+function statsMois(mois){
+  var tx=getData('dm_transactions').filter(function(t){return t.date.indexOf(mois)===0;});
+  var ecolages=tx.filter(function(t){return t.type==='recette'&&t.categorie==='Ecolage';}).reduce(function(s,t){return s+t.montant;},0);
+  var autresRec=tx.filter(function(t){return t.type==='recette'&&t.categorie!=='Ecolage';}).reduce(function(s,t){return s+t.montant;},0);
+  var dep=tx.filter(function(t){return t.type==='depense';}).reduce(function(s,t){return s+t.montant;},0);
+  var rec=ecolages+autresRec;
+  return {ecolages:ecolages,autresRec:autresRec,recettes:rec,depenses:dep,solde:rec-dep,tx:tx};
+}
+
+// ===== AVATAR =====
+function renderAvatar(t,size){var s=size||'';if(t.photo)return '<img src="'+t.photo+'" class="avatar '+s+'">';return '<div class="avatar '+s+'">'+getInitiales(t.nom)+'</div>';}
+
+// ===== AUTH =====
+function checkAuth(){return localStorage.getItem('daara_user')!==null;}
+function getCurrentUser(){return JSON.parse(localStorage.getItem('daara_user')||'{}');}
+function doLogin(e,p){var users=[{email:'admin@daara.com',password:'admin123',name:'Admin Daara'},{email:'maitre@daara.com',password:'maitre123',name:'Cheikh Ahmadou'}];var u=users.find(function(x){return x.email===e&&x.password===p;});if(u){localStorage.setItem('daara_user',JSON.stringify(u));return true;}return false;}
+function logout(){if(!confirm('Se deconnecter ?'))return;localStorage.removeItem('daara_user');location.reload();}
+
+// ===== NAV =====
+var currentPage='dashboard';
+var currentParam=null;
+function navigate(page,param){
+  currentPage=page;currentParam=param;
+  if(!checkAuth()){document.getElementById('login-screen').style.display='flex';document.getElementById('app').style.display='none';return;}
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('app').style.display='flex';
+  renderSidebar();
+  var f={dashboard:renderDashboard,talibes:renderTalibes,maitres:renderMaitres,halaqas:renderHalaqas,presences:renderPresences,suivi:renderSuivi,paiements:renderPaiements,comptabilite:renderComptabilite,parametres:renderParametres};
+  if(page==='talibeDetail'){renderTalibeDetail(param);return;}
+  (f[page]||renderDashboard)();
+}
+function renderSidebar(){
+  var impayes=getImpayes(monthStr()).length;
+  var items=[
+    {key:'dashboard',icon:'&#128202;',label:'Tableau de bord'},
+    {key:'talibes',icon:'&#128102;',label:'Talibes'},
+    {key:'maitres',icon:'&#128104;',label:'Maitres'},
+    {key:'halaqas',icon:'&#128218;',label:'Halaqas'},
+    {key:'presences',icon:'&#9989;',label:'Presences'},
+    {key:'suivi',icon:'&#128214;',label:'Suivi coranique'},
+    {key:'paiements',icon:'&#128176;',label:'Paiements',badge:impayes},
+    {key:'comptabilite',icon:'&#128200;',label:'Comptabilite'},
+    {key:'parametres',icon:'&#9881;',label:'Parametres'}
+  ];
+  var h='<div class="brand">&#128214; Daara Manager</div><nav>';
+  items.forEach(function(it){
+    var active=(currentPage===it.key||(currentPage==='talibeDetail'&&it.key==='talibes'))?' class="active"':'';
+    h+='<a href="javascript:navigate(\''+it.key+'\')"'+active+'><span class="icon">'+it.icon+'</span><span>'+it.label+'</span>'+(it.badge?'<span class="cnt">'+it.badge+'</span>':'')+'</a>';
+  });
+  h+='</nav>';document.getElementById('sidebar').innerHTML=h;
+}
+function topbar(title,actions){
+  var u=getCurrentUser();
+  return '<div class="topbar"><h2>'+title+'</h2><div class="user-info"><div class="user-avatar">'+u.name.charAt(0)+'</div><span>'+esc(u.name)+'</span><button class="btn-logout" onclick="logout()">Deconnexion</button></div></div>'+(actions||'');
+}
+function openModal(html){document.getElementById('modalContent').innerHTML=html;document.getElementById('modal').classList.add('active');}
+function closeModal(){document.getElementById('modal').classList.remove('active');}
+
+// ===== DASHBOARD =====
+function renderDashboard(){
+  var talibes=getData('dm_talibes').filter(function(t){return t.statut==='Actif';});
+  var maitres=getData('dm_maitres');
+  var presences=getData('dm_presences');
+  var today=todayStr(),mois=monthStr();
+  var presents=presences.filter(function(p){return p.date===today&&p.statut==='Present';}).length;
+  var st=statsMois(mois);
+  var impayes=getImpayes(mois);
+  var totalImpaye=impayes.reduce(function(s,t){return s+t.ecolageMensuel;},0);
+  var html=topbar('Tableau de bord');
+  if(impayes.length>0){
+    html+='<div class="alert-banner"><div><strong>'+impayes.length+' talibe(s) avec ecolage impaye en '+monthLabel(mois)+'</strong><br>Total du : '+fmtMoney(totalImpaye)+'</div><button class="btn btn-gold" onclick="navigate(\'paiements\')">Voir paiements</button></div>';
+  }
+  html+='<div class="stats-grid">'+
+    '<div class="stat-card"><h3>Talibes actifs</h3><div class="value">'+talibes.length+'</div></div>'+
+    '<div class="stat-card blue"><h3>Maitres</h3><div class="value">'+maitres.length+'</div></div>'+
+    '<div class="stat-card orange"><h3>Presents auj.</h3><div class="value">'+presents+'</div></div>'+
+    '<div class="stat-card purple"><h3>Recettes mois</h3><div class="value">'+fmtMoney(st.recettes)+'</div><div class="sub">dont ecolages: '+fmtMoney(st.ecolages)+'</div></div>'+
+    '<div class="stat-card red"><h3>Depenses mois</h3><div class="value">'+fmtMoney(st.depenses)+'</div></div>'+
+    '<div class="stat-card"><h3>Solde mois</h3><div class="value">'+fmtMoney(st.solde)+'</div></div>'+
+  '</div>';
+  html+='<div class="card"><div class="card-header"><h3>Alertes ecolages impayes</h3></div><table><thead><tr><th>Photo</th><th>Talibe</th><th>Tuteur</th><th>Ecolage</th><th>Action</th></tr></thead><tbody>';
+  if(impayes.length===0)html+='<tr><td colspan="5" class="empty">Tous les ecolages sont a jour</td></tr>';
+  else html+=impayes.map(function(t){return '<tr><td>'+renderAvatar(t)+'</td><td><strong>'+esc(t.nom)+'</strong></td><td>'+esc(t.tuteur)+'</td><td>'+fmtMoney(t.ecolageMensuel)+'</td><td><button class="btn btn-sm btn-success" onclick="quickPay('+t.id+')">Payer</button></td></tr>';}).join('');
+  html+='</tbody></table></div>';
+  document.getElementById('mainContent').innerHTML=html;
+}
+function quickPay(tid){var tx=payerMois(tid,monthStr());if(tx)printReceipt(tx.id);navigate('dashboard');}
+
+// ===== TALIBES =====
+function renderTalibes(){
+  var talibes=getData('dm_talibes');
+  var halaqas=getData('dm_halaqas');
+  var mois=monthStr();
+  var html=topbar('Gestion des Talibes','<button class="btn btn-success" onclick="openTalibeModal()">+ Nouveau Talibe</button>');
+  html+='<div class="card"><div class="card-header"><h3>Liste ('+talibes.length+')</h3><div class="filters"><input id="searchTal" placeholder="Rechercher..." oninput="filterTalibes()"></div></div>';
+  html+='<table><thead><tr><th>Photo</th><th>Nom</th><th>Age</th><th>Tuteur</th><th>Halaqa</th><th>Mois</th><th>Statut</th><th>Actions</th></tr></thead><tbody id="talBody">';
+  html+=talibes.map(function(t){
+    var h=halaqas.find(function(x){return x.id===t.halaqaId;});
+    var paye=isPaye(t.id,mois);
+    var stBadge=t.statut==='Actif'?'badge-success':'badge-danger';
+    var pB=paye?'<span class="badge badge-success">Paye</span>':'<span class="badge badge-danger">Impaye</span>';
+    return '<tr data-name="'+esc(t.nom.toLowerCase())+'" data-tuteur="'+esc(t.tuteur.toLowerCase())+'"><td>'+renderAvatar(t)+'</td><td><strong>'+esc(t.nom)+'</strong></td><td>'+t.age+'</td><td>'+esc(t.tuteur)+'</td><td>'+(h?esc(h.nom):'-')+'</td><td>'+pB+'</td><td><span class="badge '+stBadge+'">'+t.statut+'</span></td><td><button class="btn btn-sm btn-blue" onclick="navigate(\'talibeDetail\','+t.id+')">Fiche</button> <button class="btn btn-sm btn-warning" onclick="openTalibeModal('+t.id+')">Editer</button> <button class="btn btn-sm btn-danger" onclick="deleteTalibe('+t.id+')">Suppr</button></td></tr>';
+  }).join('');
+  html+='</tbody></table></div>';
+  document.getElementById('mainContent').innerHTML=html;
+}
+function filterTalibes(){
+  var q=(document.getElementById('searchTal').value||'').toLowerCase();
+  document.querySelectorAll('#talBody tr').forEach(function(tr){
+    var n=tr.dataset.name||'';var tu=tr.dataset.tuteur||'';
+    tr.style.display=(!q||n.indexOf(q)>=0||tu.indexOf(q)>=0)?'':'none';
+  });
+}
+function openTalibeModal(id){
+  var t=id?getData('dm_talibes').find(function(x){return x.id===id;}):null;
+  var halaqas=getData('dm_halaqas');
+  var hOpts=halaqas.map(function(h){return '<option value="'+h.id+'"'+(t&&t.halaqaId===h.id?' selected':'')+'>'+esc(h.nom)+'</option>';}).join('');
+  var photoHtml=t&&t.photo?'<img src="'+t.photo+'" class="avatar-lg" id="previewPhoto">':'<div class="avatar-lg" id="previewPhoto">'+(t?getInitiales(t.nom):'?')+'</div>';
+  openModal('<h3>'+(t?'Modifier':'Nouveau')+' Talibe</h3><form id="talibeForm">'+
+    '<input type="hidden" id="fId" value="'+(t?t.id:'')+'">'+
+    '<input type="hidden" id="fPhoto" value="'+(t&&t.photo?t.photo:'')+'">'+
+    '<div class="photo-upload">'+photoHtml+'<label class="photo-btn">Changer photo<input type="file" accept="image/*" onchange="uploadPhoto(this)"></label></div>'+
+    '<div class="form-group"><label>Nom *</label><input id="fNom" value="'+(t?esc(t.nom):'')+'" required></div>'+
+    '<div class="form-group"><label>Age *</label><input type="number" id="fAge" min="3" max="30" value="'+(t?t.age:'')+'" required></div>'+
+    '<div class="form-group"><label>Tuteur *</label><input id="fTuteur" value="'+(t?esc(t.tuteur):'')+'" required></div>'+
+    '<div class="form-group"><label>Tel *</label><input id="fTel" value="'+(t?esc(t.tel):'')+'" required></div>'+
+    '<div class="form-group"><label>Halaqa *</label><select id="fHalaqa" required>'+hOpts+'</select></div>'+
+    '<div class="form-group"><label>Niveau</label><select id="fNiveau"><option'+(t&&t.niveau==='Debutant'?' selected':'')+'>Debutant</option><option'+(t&&t.niveau==='Intermediaire'?' selected':'')+'>Intermediaire</option><option'+(t&&t.niveau==='Avance'?' selected':'')+'>Avance</option></select></div>'+
+    '<div class="form-group"><label>Ecolage mensuel *</label><input type="number" id="fEcolage" value="'+(t?t.ecolageMensuel:5000)+'" required></div>'+
+    '<div class="form-group"><label>Statut</label><select id="fStatut"><option'+(t&&t.statut==='Actif'?' selected':'')+'>Actif</option><option'+(t&&t.statut==='Inactif'?' selected':'')+'>Inactif</option></select></div>'+
+    '<div class="modal-actions"><button type="button" class="btn btn-cancel" onclick="closeModal()">Annuler</button><button type="submit" class="btn btn-success">Enregistrer</button></div></form>');
+  document.getElementById('talibeForm').addEventListener('submit',saveTalibe);
+}
+function uploadPhoto(input){
+  var f=input.files[0];if(!f)return;
+  var r=new FileReader();
+  r.onload=function(e){
+    var img=new Image();
+    img.onload=function(){
+      var c=document.createElement('canvas');
+      var ratio=Math.min(150/img.width,150/img.height,1);
+      c.width=img.width*ratio;c.height=img.height*ratio;
+      c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+      var d=c.toDataURL('image/jpeg',0.7);
+      document.getElementById('fPhoto').value=d;
+      var p=document.getElementById('previewPhoto');
+      p.outerHTML='<img src="'+d+'" class="avatar-lg" id="previewPhoto">';
+    };img.src=e.target.result;
+  };r.readAsDataURL(f);
+}
+function saveTalibe(e){
+  e.preventDefault();
+  var id=document.getElementById('fId').value;
+  var arr=getData('dm_talibes');
+  var d={nom:document.getElementById('fNom').value,age:parseInt(document.getElementById('fAge').value),tuteur:document.getElementById('fTuteur').value,tel:document.getElementById('fTel').value,halaqaId:parseInt(document.getElementById('fHalaqa').value),niveau:document.getElementById('fNiveau').value,ecolageMensuel:parseInt(document.getElementById('fEcolage').value),statut:document.getElementById('fStatut').value,photo:document.getElementById('fPhoto').value||null};
+  if(id){var i=arr.findIndex(function(t){return t.id===parseInt(id);});Object.assign(arr[i],d);}
+  else{d.id=nextId('dm_talibes');d.dateInscription=todayStr();arr.push(d);}
+  setData('dm_talibes',arr);closeModal();toast('Talibe enregistre');navigate('talibes');
+}
+function deleteTalibe(id){if(!confirm('Supprimer ?'))return;setData('dm_talibes',getData('dm_talibes').filter(function(t){return t.id!==id;}));toast('Supprime');navigate('talibes');}
+
+// ===== FICHE ELEVE =====
+function renderTalibeDetail(id){
+  var t=getData('dm_talibes').find(function(x){return x.id===id;});
+  if(!t){navigate('talibes');return;}
+  var halaqas=getData('dm_halaqas');
+  var h=halaqas.find(function(x){return x.id===t.halaqaId;});
+  var histoPay=getData('dm_transactions').filter(function(x){return x.type==='recette'&&x.categorie==='Ecolage'&&x.talibeId===id;}).sort(function(a,b){return b.date.localeCompare(a.date);});
+  var histoPres=getData('dm_presences').filter(function(p){return p.talibeId===id;}).sort(function(a,b){return b.date.localeCompare(a.date);}).slice(0,10);
+  var histoSuivi=getData('dm_suivi').filter(function(s){return s.talibeId===id;}).slice().reverse();
+  var mois12=getMoisRecents(12);
+  var totalPaye=histoPay.reduce(function(s,p){return s+p.montant;},0);
+  var html=topbar('Fiche Talibe','<button class="btn btn-blue" onclick="navigate(\'talibes\')">Retour</button>');
+  html+='<div class="card"><div class="profile-header">'+
+    renderAvatar(t,'avatar-lg').replace('class="avatar avatar-lg"','class="avatar-lg"')+
+    '<div class="profile-info"><h2>'+esc(t.nom)+'</h2>'+
+    '<p style="color:#666">'+t.age+' ans - '+(h?esc(h.nom):'Sans halaqa')+' - '+t.niveau+'</p>'+
+    '<p style="color:#666;margin-top:5px">Tuteur: '+esc(t.tuteur)+' - Tel: '+esc(t.tel)+'</p>'+
+    '<p style="color:#666;margin-top:5px">Inscrit le: '+t.dateInscription+' - Total paye: <strong>'+fmtMoney(totalPaye)+'</strong></p>'+
+    '<div class="profile-actions"><button class="btn btn-warning" onclick="openTalibeModal('+t.id+')">Modifier</button><button class="btn btn-success" onclick="quickPay('+t.id+')">Payer ecolage du mois</button><button class="btn btn-blue" onclick="navigate(\'comptabilite\',{talibe:'+t.id+'})">Voir dans compta</button><button class="btn btn-danger" onclick="deleteTalibe('+t.id+')">Supprimer</button></div></div></div></div>';
+  html+='<div class="card"><div class="card-header"><h3>Historique paiements (12 mois)</h3></div><div class="month-grid">';
+  mois12.forEach(function(m){
+    var paye=isPaye(t.id,m);
+    var tx=histoPay.find(function(x){return x.date.indexOf(m)===0;});
+    html+='<div class="month-card '+(paye?'paid':'unpaid')+'"><div class="m">'+monthLabel(m)+'</div><div class="s '+(paye?'paid':'unpaid')+'">'+(paye?'Paye':'Impaye')+'</div>'+
+      (paye?'<button class="btn btn-blue" onclick="printReceipt('+tx.id+')">Recu</button>':'<button class="btn btn-success" onclick="quickPayMonth('+t.id+',\''+m+'\')">Payer</button>')+'</div>';
+  });
+  html+='</div></div>';
+  html+='<div class="card"><div class="card-header"><h3>Paiements detailles</h3></div><table><thead><tr><th>Date</th><th>Description</th><th>Montant</th><th>Action</th></tr></thead><tbody>';
+  if(histoPay.length===0)html+='<tr><td colspan="4" class="empty">Aucun paiement</td></tr>';
+  else html+=histoPay.map(function(p){return '<tr><td>'+p.date+'</td><td>'+esc(p.description)+'</td><td>'+fmtMoney(p.montant)+'</td><td><button class="btn btn-sm btn-blue" onclick="printReceipt('+p.id+')">Recu</button></td></tr>';}).join('');
+  html+='</tbody></table></div>';
+  html+='<div class="card"><div class="card-header"><h3>Dernieres presences</h3></div><table><thead><tr><th>Date</th><th>Statut</th></tr></thead><tbody>';
+  if(histoPres.length===0)html+='<tr><td colspan="2" class="empty">Aucune presence</td></tr>';
+  else html+=histoPres.map(function(p){var c=p.statut==='Present'?'badge-success':'badge-danger';return '<tr><td>'+p.date+'</td><td><span class="badge '+c+'">'+p.statut+'</span></td></tr>';}).join('');
+  html+='</tbody></table></div>';
+  html+='<div class="card"><div class="card-header"><h3>Suivi coranique</h3></div><table><thead><tr><th>Sourate</th><th>Statut</th><th>Note</th><th>Date</th></tr></thead><tbody>';
+  if(histoSuivi.length===0)html+='<tr><td colspan="4" class="empty">Aucune evaluation</td></tr>';
+  else html+=histoSuivi.map(function(s){var c=s.statut==='Maitrisee'?'badge-success':'badge-warning';return '<tr><td>'+esc(s.sourate)+'</td><td><span class="badge '+c+'">'+s.statut+'</span></td><td>'+s.note+'/20</td><td>'+s.date+'</td></tr>';}).join('');
+  html+='</tbody></table></div>';
+  document.getElementById('mainContent').innerHTML=html;
+}
+function quickPayMonth(tid,mois){var tx=payerMois(tid,mois);if(tx)printReceipt(tx.id);navigate('talibeDetail',tid);}
+
+// ===== RECU =====
+function printReceipt(txId){
+  var tx=getData('dm_transactions').find(function(x){return x.id===txId;});
+  if(!tx)return;
+  var tal=tx.talibeId?getData('dm_talibes').find(function(x){return x.id===tx.talibeId;}):null;
+  var p=getParam();
+  openModal('<div class="receipt" id="printArea"><h2>'+esc(p.nomDaara||'Daara')+'</h2><div class="sub">Recu de paiement</div>'+
+    '<div class="row"><span>Date</span><strong>'+tx.date+'</strong></div>'+
+    '<div class="row"><span>Recu N</span><strong>#'+tx.id+'</strong></div>'+
+    (tal?'<div class="row"><span>Talibe</span><strong>'+esc(tal.nom)+'</strong></div><div class="row"><span>Tuteur</span><strong>'+esc(tal.tuteur)+'</strong></div>':'')+
+    '<div class="row"><span>Categorie</span><strong>'+esc(tx.categorie)+'</strong></div>'+
+    '<div class="row"><span>Description</span><strong>'+esc(tx.description)+'</strong></div>'+
+    '<div class="total">Montant : '+fmtMoney(tx.montant)+'</div>'+
+    '<div class="sub" style="margin-top:20px;border:none">Document genere automatiquement.</div></div>'+
+    '<div class="modal-actions"><button class="btn btn-cancel" onclick="closeModal()">Fermer</button><button class="btn btn-blue" onclick="window.print()">Imprimer</button></div>');
+}
+
+// ===== MAITRES =====
+function renderMaitres(){
+  var ms=getData('dm_maitres');var hs=getData('dm_halaqas');
+  var html=topbar('Maitres','<button class="btn btn-success" onclick="openMaitreModal()">+ Nouveau Maitre</button>');
+  html+='<div class="card"><table><thead><tr><th>Nom</th><th>Specialite</th><th>Tel</th><th>Halaqa</th><th>Salaire</th><th>Actions</th></tr></thead><tbody>';
+  if(ms.length===0)html+='<tr><td colspan="6" class="empty">Aucun maitre</td></tr>';
+  else html+=ms.map(function(m){var h=hs.find(function(x){return x.id===m.halaqaId;});return '<tr><td><strong>'+esc(m.nom)+'</strong></td><td>'+esc(m.specialite)+'</td><td>'+esc(m.tel)+'</td><td>'+(h?esc(h.nom):'-')+'</td><td>'+fmtMoney(m.salaire)+'</td><td><button class="btn btn-sm btn-warning" onclick="openMaitreModal('+m.id+')">Editer</button> <button class="btn btn-sm btn-danger" onclick="deleteMaitre('+m.id+')">Suppr</button></td></tr>';}).join('');
+  html+='</tbody></table></div>';document.getElementById('mainContent').innerHTML=html;
+}
+function openMaitreModal(id){
+  var m=id?getData('dm_maitres').find(function(x){return x.id===id;}):null;
+  var hs=getData('dm_halaqas');
+  var opts=hs.map(function(h){return '<option value="'+h.id+'"'+(m&&m.halaqaId===h.id?' selected':'')+'>'+esc(h.nom)+'</option>';}).join('');
+  openModal('<h3>'+(m?'Modifier':'Nouveau')+' Maitre</h3><form id="maitreForm"><input type="hidden" id="mId" value="'+(m?m.id:'')+'">'+
+    '<div class="form-group"><label>Nom *</label><input id="mNom" value="'+(m?esc(m.nom):'')+'" required></div>'+
+    '<div class="form-group"><label>Specialite</label><select id="mSpec"><option'+(m&&m.specialite==='Hifz'?' selected':'')+'>Hifz</option><option'+(m&&m.specialite==='Tajwid'?' selected':'')+'>Tajwid</option><option'+(m&&m.specialite==='Tafsir'?' selected':'')+'>Tafsir</option><option'+(m&&m.specialite==='Arabe'?' selected':'')+'>Arabe</option></select></div>'+
+    '<div class="form-group"><label>Tel *</label><input id="mTel" value="'+(m?esc(m.tel):'')+'" required></div>'+
+    '<div class="form-group"><label>Halaqa</label><select id="mHalaqa">'+opts+'</select></div>'+
+    '<div class="form-group"><label>Salaire</label><input type="number" id="mSalaire" value="'+(m?m.salaire:50000)+'" required></div>'+
+    '<div class="modal-actions"><button type="button" class="btn btn-cancel" onclick="closeModal()">Annuler</button><button type="submit" class="btn btn-success">Enregistrer</button></div></form>');
+  document.getElementById('maitreForm').addEventListener('submit',function(e){
+    e.preventDefault();var arr=getData('dm_maitres');var id=document.getElementById('mId').value;
+    var d={nom:document.getElementById('mNom').value,specialite:document.getElementById('mSpec').value,tel:document.getElementById('mTel').value,halaqaId:parseInt(document.getElementById('mHalaqa').value),salaire:parseInt(document.getElementById('mSalaire').value)};
+    if(id){var i=arr.findIndex(function(x){return x.id===parseInt(id);});Object.assign(arr[i],d);}else{d.id=nextId('dm_maitres');arr.push(d);}
+    setData('dm_maitres',arr);closeModal();toast('Maitre enregistre');navigate('maitres');
+  });
+}
+function deleteMaitre(id){if(!confirm('Supprimer ?'))return;setData('dm_maitres',getData('dm_maitres').filter(function(m){return m.id!==id;}));toast('Supprime');navigate('maitres');}
+
+// ===== HALAQAS =====
+function renderHalaqas(){
+  var hs=getData('dm_halaqas');var ts=getData('dm_talibes');var ms=getData('dm_maitres');
+  var html=topbar('Halaqas','<button class="btn btn-success" onclick="openHalaqaModal()">+ Nouvelle Halaqa</button>');
+  html+='<div class="card"><table><thead><tr><th>Nom</th><th>Niveau</th><th>Horaire</th><th>Maitre</th><th>Talibes</th><th>Actions</th></tr></thead><tbody>';
+  if(hs.length===0)html+='<tr><td colspan="6" class="empty">Aucune halaqa</td></tr>';
+  else html+=hs.map(function(h){var m=ms.find(function(x){return x.id===h.maitreId;});var nb=ts.filter(function(t){return t.halaqaId===h.id;}).length;return '<tr><td><strong>'+esc(h.nom)+'</strong></td><td>'+esc(h.niveau)+'</td><td>'+esc(h.horaire)+'</td><td>'+(m?esc(m.nom):'-')+'</td><td>'+nb+'</td><td><button class="btn btn-sm btn-warning" onclick="openHalaqaModal('+h.id+')">Editer</button> <button class="btn btn-sm btn-danger" onclick="deleteHalaqa('+h.id+')">Suppr</button></td></tr>';}).join('');
+  html+='</tbody></table></div>';document.getElementById('mainContent').innerHTML=html;
+}
+function openHalaqaModal(id){
+  var h=id?getData('dm_halaqas').find(function(x){return x.id===id;}):null;
+  var ms=getData('dm_maitres');
+  var opts='<option value="">- Aucun -</option>'+ms.map(function(m){return '<option value="'+m.id+'"'+(h&&h.maitreId===m.id?' selected':'')+'>'+esc(m.nom)+'</option>';}).join('');
+  openModal('<h3>'+(h?'Modifier':'Nouvelle')+' Halaqa</h3><form id="halaqaForm"><input type="hidden" id="hId" value="'+(h?h.id:'')+'">'+
+    '<div class="form-group"><label>Nom *</label><input id="hNom" value="'+(h?esc(h.nom):'')+'" required></div>'+
+    '<div class="form-group"><label>Niveau</label><select id="hNiveau"><option'+(h&&h.niveau==='Debutant'?' selected':'')+'>Debutant</option><option'+(h&&h.niveau==='Intermediaire'?' selected':'')+'>Intermediaire</option><option'+(h&&h.niveau==='Avance'?' selected':'')+'>Avance</option></select></div>'+
+    '<div class="form-group"><label>Horaire *</label><input id="hHoraire" value="'+(h?esc(h.horaire):'')+'" placeholder="08h-11h" required></div>'+
+    '<div class="form-group"><label>Maitre</label><select id="hMaitre">'+opts+'</select></div>'+
+    '<div class="modal-actions"><button type="button" class="btn btn-cancel" onclick="closeModal()">Annuler</button><button type="submit" class="btn btn-success">Enregistrer</button></div></form>');
+  document.getElementById('halaqaForm').addEventListener('submit',function(e){
+    e.preventDefault();var arr=getData('dm_halaqas');var id=document.getElementById('hId').value;var mv=document.getElementById('hMaitre').value;
+    var d={nom:document.getElementById('hNom').value,niveau:document.getElementById('hNiveau').value,horaire:document.getElementById('hHoraire').value,maitreId:mv?parseInt(mv):null};
+    if(id){var i=arr.findIndex(function(x){return x.id===parseInt(id);});Object.assign(arr[i],d);}else{d.id=nextId('dm_halaqas');arr.push(d);}
+    setData('dm_halaqas',arr);closeModal();toast('Halaqa enregistree');navigate('halaqas');
+  });
+}
+function deleteHalaqa(id){if(!confirm('Supprimer ?'))return;setData('dm_halaqas',getData('dm_halaqas').filter(function(h){return h.id!==id;}));toast('Supprime');navigate('halaqas');}
+
+// ===== PRESENCES =====
+function renderPresences(){
+  var date=(document.getElementById('pDate')||{}).value||todayStr();
+  var ts=getData('dm_talibes').filter(function(t){return t.statut==='Actif';});
+  var pres=getData('dm_presences');
+  var hs=getData('dm_halaqas');
+  var html=topbar('Presences','<div class="filters"><label style="align-self:center;font-size:13px;font-weight:600;">Date :</label><input type="date" id="pDate" value="'+date+'" onchange="renderPresences()"></div>');
+  html+='<div class="card"><div class="card-header"><h3>Pointage du '+date+'</h3></div><table><thead><tr><th>Talibe</th><th>Halaqa</th><th>Statut</th><th>Actions</th></tr></thead><tbody>';
+  if(ts.length===0)html+='<tr><td colspan="4" class="empty">Aucun talibe actif</td></tr>';
+  else html+=ts.map(function(t){
+    var p=pres.find(function(x){return x.talibeId===t.id&&x.date===date;});
+    var st=p?p.statut:'Non pointe';
+    var c=st==='Present'?'badge-success':st==='Absent'?'badge-danger':'badge-warning';
+    var h=hs.find(function(x){return x.id===t.halaqaId;});
+    return '<tr><td><strong>'+esc(t.nom)+'</strong></td><td>'+(h?esc(h.nom):'-')+'</td><td><span class="badge '+c+'">'+st+'</span></td><td><button class="btn btn-sm btn-success" onclick="markPres('+t.id+',\''+date+'\',\'Present\')">Present</button> <button class="btn btn-sm btn-danger" onclick="markPres('+t.id+',\''+date+'\',\'Absent\')">Absent</button></td></tr>';
+  }).join('');
+  html+='</tbody></table></div>';
+  var hist=pres.slice().sort(function(a,b){return b.date.localeCompare(a.date);}).slice(0,15);
+  html+='<div class="card"><div class="card-header"><h3>Historique recent</h3></div><table><thead><tr><th>Talibe</th><th>Date</th><th>Statut</th></tr></thead><tbody>';
+  if(hist.length===0)html+='<tr><td colspan="3" class="empty">Aucun historique</td></tr>';
+  else html+=hist.map(function(p){var t=ts.find(function(x){return x.id===p.talibeId;});var c=p.statut==='Present'?'badge-success':'badge-danger';return '<tr><td>'+(t?esc(t.nom):'Inconnu')+'</td><td>'+p.date+'</td><td><span class="badge '+c+'">'+p.statut+'</span></td></tr>';}).join('');
+  html+='</tbody></table></div>';document.getElementById('mainContent').innerHTML=html;
+}
+function markPres(tid,date,st){
+  var arr=getData('dm_presences');var ex=arr.find(function(p){return p.talibeId===tid&&p.date===date;});
+  if(ex)ex.statut=st;else arr.push({id:nextId('dm_presences'),talibeId:tid,date:date,statut:st});
+  setData('dm_presences',arr);toast('Presence enregistree');renderPresences();
+}
+
+// ===== SUIVI =====
+function renderSuivi(){
+  var su=getData('dm_suivi').slice().reverse();var ts=getData('dm_talibes');
+  var html=topbar('Suivi coranique','<button class="btn btn-success" onclick="openSuiviModal()">+ Nouvelle evaluation</button>');
+  html+='<div class="card"><table><thead><tr><th>Talibe</th><th>Sourate</th><th>Statut</th><th>Note</th><th>Date</th><th>Actions</th></tr></thead><tbody>';
+  if(su.length===0)html+='<tr><td colspan="6" class="empty">Aucune evaluation</td></tr>';
+  else html+=su.map(function(s){var t=ts.find(function(x){return x.id===s.talibeId;});var c=s.statut==='Maitrisee'?'badge-success':'badge-warning';return '<tr><td><strong>'+(t?esc(t.nom):'?')+'</strong></td><td>'+esc(s.sourate)+'</td><td><span class="badge '+c+'">'+s.statut+'</span></td><td>'+s.note+'/20</td><td>'+s.date+'</td><td><button class="btn btn-sm btn-danger" onclick="deleteSuivi('+s.id+')">Suppr</button></td></tr>';}).join('');
+  html+='</tbody></table></div>';document.getElementById('mainContent').innerHTML=html;
+}
+function openSuiviModal(){
+  var ts=getData('dm_talibes');
+  var opts=ts.map(function(t){return '<option value="'+t.id+'">'+esc(t.nom)+'</option>';}).join('');
+  openModal('<h3>Nouvelle evaluation</h3><form id="suiviForm"><div class="form-group"><label>Talibe *</label><select id="sTalibe" required>'+opts+'</select></div><div class="form-group"><label>Sourate *</label><input id="sSourate" required></div><div class="form-group"><label>Statut</label><select id="sStatut"><option>En cours</option><option>Maitrisee</option></select></div><div class="form-group"><label>Note /20 *</label><input type="number" id="sNote" min="0" max="20" required></div><div class="form-group"><label>Date *</label><input type="date" id="sDate" value="'+todayStr()+'" required></div><div class="modal-actions"><button type="button" class="btn btn-cancel" onclick="closeModal()">Annuler</button><button type="submit" class="btn btn-success">Enregistrer</button></div></form>');
+  document.getElementById('suiviForm').addEventListener('submit',function(e){
+    e.preventDefault();var arr=getData('dm_suivi');
+    arr.push({id:nextId('dm_suivi'),talibeId:parseInt(document.getElementById('sTalibe').value),sourate:document.getElementById('sSourate').value,statut:document.getElementById('sStatut').value,note:parseInt(document.getElementById('sNote').value),date:document.getElementById('sDate').value});
+    setData('dm_suivi',arr);closeModal();toast('Evaluation enregistree');navigate('suivi');
+  });
+}
+function deleteSuivi(id){if(!confirm('Supprimer ?'))return;setData('dm_suivi',getData('dm_suivi').filter(function(s){return s.id!==id;}));toast('Supprime');navigate('suivi');}
+
+// ===== PAIEMENTS =====
+function renderPaiements(){
+  var mois=(document.getElementById('payMois')||{}).value||monthStr();
+  var ts=getData('dm_talibes').filter(function(t){return t.statut==='Actif';});
+  var st=statsMois(mois);
+  var impayes=ts.filter(function(t){return !isPaye(t.id,mois);});
+  var total=impayes.reduce(function(s,t){return s+t.ecolageMensuel;},0);
+  var html=topbar('Paiements','<div class="filters"><label style="align-self:center;font-size:13px;font-weight:600;">Mois :</label><input type="month" id="payMois" value="'+mois+'" onchange="renderPaiements()"><button class="btn btn-blue" onclick="navigate(\'comptabilite\')">Bilan</button></div>');
+  html+='<div class="stats-grid">'+
+    '<div class="stat-card"><h3>Talibes</h3><div class="value">'+ts.length+'</div></div>'+
+    '<div class="stat-card orange"><h3>Payes</h3><div class="value">'+(ts.length-impayes.length)+'</div></div>'+
+    '<div class="stat-card red"><h3>Impayes</h3><div class="value">'+impayes.length+'</div></div>'+
+    '<div class="stat-card purple"><h3>Encaissement</h3><div class="value">'+fmtMoney(st.ecolages)+'</div></div>'+
+    '<div class="stat-card gold"><h3>Total du</h3><div class="value">'+fmtMoney(total)+'</div></div>'+
+  '</div>';
+  html+='<div class="card"><div class="card-header"><h3>Paiements - '+monthLabel(mois)+'</h3>'+(impayes.length>0?'<button class="btn btn-gold" onclick="payerTous(\''+mois+'\')">Payer tous les impayes</button>':'')+'</div>';
+  html+='<table><thead><tr><th>Photo</th><th>Talibe</th><th>Tuteur</th><th>Ecolage</th><th>Statut</th><th>Action</th></tr></thead><tbody>';
+  if(ts.length===0)html+='<tr><td colspan="6" class="empty">Aucun talibe</td></tr>';
+  else html+=ts.map(function(t){
+    var paye=isPaye(t.id,mois);
+    var b=paye?'<span class="badge badge-success">Paye</span>':'<span class="badge badge-danger">Impaye</span>';
+    return '<tr><td>'+renderAvatar(t)+'</td><td><strong>'+esc(t.nom)+'</strong></td><td>'+esc(t.tuteur)+'</td><td>'+fmtMoney(t.ecolageMensuel)+'</td><td>'+b+'</td><td>'+(paye?'<button class="btn btn-sm btn-blue" onclick="printLastReceipt('+t.id+',\''+mois+'\')">Recu</button>':'<button class="btn btn-sm btn-success" onclick="payerUn('+t.id+',\''+mois+'\')">Payer</button>')+'</td></tr>';
+  }).join('');
+  html+='</tbody></table></div>';document.getElementById('mainContent').innerHTML=html;
+}
+function payerUn(tid,mois){var tx=payerMois(tid,mois);if(tx){printReceipt(tx.id);}renderPaiements();}
+function payerTous(mois){var imp=getImpayes(mois);if(imp.length===0)return;if(!confirm('Enregistrer '+imp.length+' paiement(s) pour '+monthLabel(mois)+' ?'))return;var c=0;imp.forEach(function(t){if(payerMois(t.id,mois))c++;});toast(c+' paiement(s) enregistre(s)');renderPaiements();}
+function printLastReceipt(tid,mois){var tx=getData('dm_transactions').find(function(t){return t.talibeId===tid&&t.categorie==='Ecolage'&&t.date.indexOf(mois)===0;});if(tx)printReceipt(tx.id);}
+
+// ===== COMPTABILITE (avec intégration Paiements) =====
+function renderComptabilite(){
+  var type=(document.getElementById('cType')||{}).value||'';
+  var mois=(document.getElementById('cMois')||{}).value||monthStr();
+  var st=statsMois(mois);
+  var talibesActifs=getData('dm_talibes').filter(function(t){return t.statut==='Actif';});
+  var payes=getPayes(mois);
+  var impayes=getImpayes(mois);
+  var totalDu=impayes.reduce(function(s,t){return s+t.ecolageMensuel;},0);
+  var html=topbar('Comptabilite','<div class="filters"><input type="month" id="cMois" value="'+mois+'" onchange="renderComptabilite()"><select id="cType" onchange="renderComptabilite()"><option value="">Tous</option><option value="recette"'+(type==='recette'?' selected':'')+'>Recettes</option><option value="depense"'+(type==='depense'?' selected':'')+'>Depenses</option></select><button class="btn btn-success" onclick="openTxModal(\'recette\')">+ Recette</button><button class="btn btn-danger" onclick="openTxModal(\'depense\')">+ Depense</button></div>');
+  // Section 1: Bilan du mois
+  html+='<div class="card"><div class="card-header"><h3>Bilan - '+monthLabel(mois)+'</h3><button class="btn btn-sm btn-blue" onclick="exportCSV()">Export CSV</button></div>';
+  html+='<div class="bilan-grid">'+
+    '<div class="bilan-item green"><div class="l">Ecolages encaisses</div><div class="v">'+fmtMoney(st.ecolages)+'</div></div>'+
+    '<div class="bilan-item blue"><div class="l">Autres recettes</div><div class="v">'+fmtMoney(st.autresRec)+'</div></div>'+
+    '<div class="bilan-item gold"><div class="l">Total recettes</div><div class="v">'+fmtMoney(st.recettes)+'</div></div>'+
+    '<div class="bilan-item red"><div class="l">Total depenses</div><div class="v">'+fmtMoney(st.depenses)+'</div></div>'+
+    '<div class="bilan-item '+(st.solde>=0?'green':'red')+'"><div class="l">Solde</div><div class="v">'+fmtMoney(st.solde)+'</div></div>'+
+  '</div></div>';
+  // Section 2: Situation ecolages
+  html+='<div class="card"><div class="card-header"><h3>Situation ecolages - '+monthLabel(mois)+'</h3><button class="btn btn-sm btn-success" onclick="openEcolageModal(\''+mois+'\')">+ Enregistrer un ecolage</button></div>';
+  html+='<div class="bilan-grid">'+
+    '<div class="bilan-item blue"><div class="l">Talibes actifs</div><div class="v">'+talibesActifs.length+'</div></div>'+
+    '<div class="bilan-item green"><div class="l">Payes</div><div class="v">'+payes.length+'</div></div>'+
+    '<div class="bilan-item red"><div class="l">Impayes</div><div class="v">'+impayes.length+'</div></div>'+
+    '<div class="bilan-item gold"><div class="l">Total du</div><div class="v">'+fmtMoney(totalDu)+'</div></div>'+
+  '</div>';
+  if(impayes.length>0){
+    html+='<div style="margin-top:15px"><strong style="font-size:13px">Ecolages impayes :</strong> '+impayes.map(function(t){return '<span class="badge badge-danger" style="margin:3px;cursor:pointer" onclick="payerDepuisCompta('+t.id+',\''+mois+'\')">'+esc(t.nom)+' - '+fmtMoney(t.ecolageMensuel)+' (cliquer pour payer)</span>';}).join('')+'</div>';
+  }
+  html+='</div>';
+  // Section 3: Transactions filtrees
+  var tx=getData('dm_transactions');
+  var f=tx.filter(function(t){return(!type||t.type===type)&&(!mois||t.date.indexOf(mois)===0);}).sort(function(a,b){return b.date.localeCompare(a.date);});
+  html+='<div class="card"><div class="card-header"><h3>Toutes les transactions</h3></div>';
+  html+='<table><thead><tr><th>Date</th><th>Type</th><th>Categorie</th><th>Description</th><th>Talibe</th><th>Montant</th><th>Action</th></tr></thead><tbody>';
+  if(f.length===0)html+='<tr><td colspan="7" class="empty">Aucune transaction</td></tr>';
+  else html+=f.map(function(t){
+    var c=t.type==='recette'?'badge-success':'badge-danger';
+    var signe=t.type==='recette'?'+':'-';
+    var color=t.type==='recette'?'#059669':'#dc2626';
+    var tal=t.talibeId?getData('dm_talibes').find(function(x){return x.id===t.talibeId;}):null;
+    return '<tr><td>'+t.date+'</td><td><span class="badge '+c+'">'+t.type+'</span></td><td>'+esc(t.categorie)+'</td><td>'+esc(t.description)+'</td><td>'+(tal?'<a href="javascript:navigate(\'talibeDetail\','+tal.id+')" style="color:var(--blue)">'+esc(tal.nom)+'</a>':'-')+'</td><td style="color:'+color+';font-weight:bold">'+signe+' '+fmtMoney(t.montant)+'</td><td><button class="btn btn-sm btn-danger" onclick="deleteTx('+t.id+')">Suppr</button></td></tr>';
+  }).join('');
+  html+='</tbody></table></div>';
+  document.getElementById('mainContent').innerHTML=html;
+}
+function payerDepuisCompta(tid,mois){var tx=payerMois(tid,mois);if(tx){printReceipt(tx.id);}renderComptabilite();}
+function openEcolageModal(mois){
+  var impayes=getImpayes(mois);
+  if(impayes.length===0){toast('Tous les ecolages sont payes pour '+monthLabel(mois),'info');return;}
+  var opts=impayes.map(function(t){return '<option value="'+t.id+'">'+esc(t.nom)+' - '+fmtMoney(t.ecolageMensuel)+'</option>';}).join('');
+  openModal('<h3>Enregistrer un ecolage - '+monthLabel(mois)+'</h3><form id="ecolageForm">'+
+    '<div class="form-group"><label>Talibe impaye *</label><select id="eTalibe" required>'+opts+'</select></div>'+
+    '<div class="form-group"><label>Montant *</label><input type="number" id="eMontant" value="'+impayes[0].ecolageMensuel+'" required></div>'+
+    '<div class="modal-actions"><button type="button" class="btn btn-cancel" onclick="closeModal()">Annuler</button><button type="submit" class="btn btn-success">Enregistrer le paiement</button></div></form>');
+  document.getElementById('eTalibe').addEventListener('change',function(){
+    var t=impayes.find(function(x){return x.id===parseInt(this.value);}.bind(this));
+    if(t)document.getElementById('eMontant').value=t.ecolageMensuel;
+  });
+  document.getElementById('ecolageForm').addEventListener('submit',function(e){
+    e.preventDefault();
+    var tid=parseInt(document.getElementById('eTalibe').value);
+    var m=parseInt(document.getElementById('eMontant').value);
+    var tx=payerMois(tid,mois,m);
+    if(tx){closeModal();printReceipt(tx.id);renderComptabilite();}
+  });
+}
+function openTxModal(type){
+  var cats=type==='recette'?['Ecolage','Don','Zakat','Autre']:['Salaire','Nourriture','Fournitures','Loyer','Eau/Electricite','Entretien','Autre'];
+  openModal('<h3>Nouvelle '+(type==='recette'?'recette':'depense')+'</h3><form id="txForm"><input type="hidden" id="tType" value="'+type+'">'+
+    '<div class="form-group"><label>Categorie</label><select id="tCat">'+cats.map(function(c){return '<option>'+c+'</option>';}).join('')+'</select></div>'+
+    '<div class="form-group"><label>Description *</label><input id="tDesc" required></div>'+
+    '<div class="form-group"><label>Montant *</label><input type="number" id="tMontant" required></div>'+
+    '<div class="form-group"><label>Date *</label><input type="date" id="tDate" value="'+todayStr()+'" required></div>'+
+    '<div class="modal-actions"><button type="button" class="btn btn-cancel" onclick="closeModal()">Annuler</button><button type="submit" class="btn btn-success">Enregistrer</button></div></form>');
+  document.getElementById('txForm').addEventListener('submit',function(e){
+    e.preventDefault();var arr=getData('dm_transactions');
+    arr.push({id:nextId('dm_transactions'),type:document.getElementById('tType').value,categorie:document.getElementById('tCat').value,description:document.getElementById('tDesc').value,montant:parseInt(document.getElementById('tMontant').value),date:document.getElementById('tDate').value,talibeId:null});
+    setData('dm_transactions',arr);closeModal();toast('Transaction enregistree');navigate('comptabilite');
+  });
+}
+function deleteTx(id){
+  var tx=getData('dm_transactions').find(function(t){return t.id===id;});
+  if(!tx)return;
+  var msg=tx.categorie==='Ecolage'?'Supprimer ce paiement liberera automatiquement le mois du talibe. Confirmer ?':'Supprimer cette transaction ?';
+  if(!confirm(msg))return;
+  setData('dm_transactions',getData('dm_transactions').filter(function(t){return t.id!==id;}));
+  toast('Transaction supprimee');navigate('comptabilite');
+}
+function exportCSV(){
+  var tx=getData('dm_transactions');
+  var csv='Date,Type,Categorie,Description,Montant,Talibe\n';
+  tx.forEach(function(t){
+    var tal=t.talibeId?getData('dm_talibes').find(function(x){return x.id===t.talibeId;}):null;
+    csv+='"'+t.date+'","'+t.type+'","'+t.categorie+'","'+t.description.replace(/"/g,'""')+'",'+t.montant+',"'+(tal?tal.nom:'')+'"\n';
+  });
+  var blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='transactions-'+todayStr()+'.csv';a.click();
+  toast('Export CSV effectue');
+}
+
+// ===== PARAMETRES =====
+function renderParametres(){
+  var p=getParam();
+  var html=topbar('Parametres');
+  html+='<div class="card"><div class="card-header"><h3>Configuration</h3></div><form id="paramForm"><div class="form-group"><label>Nom daara</label><input id="pNom" value="'+esc(p.nomDaara||'')+'" required></div><div class="form-group"><label>Devise</label><input id="pDev" value="'+esc(p.devise||'FCFA')+'" required></div><div class="form-group"><label>Ecolage defaut</label><input type="number" id="pEco" value="'+(p.ecolageDefaut||5000)+'" required></div><button type="submit" class="btn btn-success">Enregistrer</button></form></div>';
+  html+='<div class="card"><div class="card-header"><h3>Sauvegarde</h3></div><div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn btn-blue" onclick="exportJSON()">Exporter JSON</button><button class="btn btn-warning" onclick="document.getElementById(\'impFile\').click()">Importer JSON</button><input type="file" id="impFile" accept=".json" style="display:none" onchange="importJSON(this)"><button class="btn btn-danger" onclick="resetAll()">Reinitialiser</button></div></div>';
+  document.getElementById('mainContent').innerHTML=html;
+  document.getElementById('paramForm').addEventListener('submit',function(e){e.preventDefault();localStorage.setItem('dm_params',JSON.stringify({nomDaara:document.getElementById('pNom').value,devise:document.getElementById('pDev').value,ecolageDefaut:parseInt(document.getElementById('pEco').value)}));toast('Parametres enregistres');});
+}
+function exportJSON(){var d={};['dm_talibes','dm_maitres','dm_halaqas','dm_presences','dm_suivi','dm_transactions','dm_params'].forEach(function(k){d[k]=getData(k);});var b=new Blob([JSON.stringify(d,null,2)],{type:'application/json'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='daara-backup-'+todayStr()+'.json';a.click();toast('Export effectue');}
+function importJSON(input){var f=input.files[0];if(!f)return;var r=new FileReader();r.onload=function(e){try{var d=JSON.parse(e.target.result);Object.keys(d).forEach(function(k){localStorage.setItem(k,JSON.stringify(d[k]));});toast('Import reussi');navigate('dashboard');}catch(x){toast('Fichier invalide','error');}};r.readAsText(f);}
+function resetAll(){if(!confirm('Effacer TOUTES les donnees ?'))return;if(!confirm('Vraiment sur ?'))return;['dm_talibes','dm_maitres','dm_halaqas','dm_presences','dm_suivi','dm_transactions','dm_params'].forEach(function(k){localStorage.removeItem(k);});location.reload();}
+
+// ===== BOOT =====
+initData();
+document.getElementById('loginForm').addEventListener('submit',function(e){
+  e.preventDefault();
+  if(doLogin(document.getElementById('loginEmail').value.trim(),document.getElementById('loginPwd').value))navigate('dashboard');
+  else document.getElementById('loginErr').textContent='Email ou mot de passe incorrect';
+});
+if(checkAuth())navigate('dashboard');
+</script>
+</body>
+</html>
